@@ -85,5 +85,7 @@ public class VisionCone : MonoBehaviour
         Gizmos.DrawRay(VisionObject.position, VisionObject.right * 4f);
     }
 
-    
+    // Fuentes:
+    // https://www.youtube.com/watch?v=lV47ED8h61k (Video anexado a la tarea en el classroom por el profesor (Unica fuente))
+
 }
