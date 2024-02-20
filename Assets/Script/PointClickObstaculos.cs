@@ -1,17 +1,18 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
-public class MouseClick : MonoBehaviour
+public class PointClickObstaculos : MonoBehaviour
 {
-
+    //public GameObject obstaculo;
+    public float RangoDeFlee = 4.0f;
+    public bool AplicandoFlee;
     //------------------------------------------------------------------------------------------------------------
     public enum SteeringBehavior
     {
         None,  // 0
         PointClick,// 1
+        flee, //2
     };
 
     public float maxSteeringForce = 1.0f;
@@ -38,6 +39,7 @@ public class MouseClick : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        AplicandoFlee = false;
         rb = GetComponent<Rigidbody>();
         maxSpeed = 0.0f;
     }
@@ -66,8 +68,37 @@ public class MouseClick : MonoBehaviour
     {
         Vector3 Distance = Vector3.zero;
         Vector3 steeringForce = Vector3.zero;
+        AplicandoFlee = false;
 
-        steeringForce = Seek(mouseWorldPos);
+        //Creamos una lista que contenga a todos los game objects con el tag de Obstaculo
+        GameObject[] obstaculos = GameObject.FindGameObjectsWithTag("Obstaculo");
+        //Por cada game object que sea considerado obstaculo en la lista de obstaculos
+        foreach (GameObject obstaculo in obstaculos)
+        {
+            // Calculamos la distancia entre el agente y los diferentes obstaculos
+            Vector3 distanceToObstacle = obstaculo.transform.position - transform.position;
+            //Convertimos la distancia calculada previamente en una magnitud y un valor flotante para que pueda coincidir con el flotante del RangoDeFlee
+            float distance = distanceToObstacle.magnitude;
+
+            //Si la distancia del agente es menor o igual al rango del flee
+            if (distance <= RangoDeFlee)
+            {
+                Debug.Log("Se está aplicando flee");
+                //Se suma flee al agente sin dejar el seek de lado
+                steeringForce += Flee(obstaculo.transform.position);
+                //Se muestra en el inspector que si se esta aplicando el flee
+                AplicandoFlee = true;
+            }//De caso contrario
+            else
+            {
+                //Solo de aplica el seek a la posicion del click
+                steeringForce = Seek(mouseWorldPos);
+                //Se muestra en el inspector que no se esta aplicando el flee
+                //AplicandoFlee = false;
+            }
+        }
+        //steeringForce = Seek(mouseWorldPos);
+        //steeringForce = Flee(obstaculo.transform.position);
         steeringForce = Vector3.Min(steeringForce, steeringForce.normalized * maxSteeringForce);
         rb.AddForce(steeringForce, ForceMode.Acceleration);
     }
@@ -110,15 +141,31 @@ public class MouseClick : MonoBehaviour
         return steeringForce;
     }
 
+    //Seek del profe
     private Vector3 Seek(Vector3 TargetPosition)
     {
         return GetSteeringForce(TargetPosition - transform.position);
+    }
+
+    //Flee del profe
+    private Vector3 Flee(Vector3 TargetPosition)
+    {
+        return GetSteeringForce(transform.position - TargetPosition);
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawLine(transform.position, mouseWorldPos);
+
+        /*Gizmos.color = Color.red;
+        Gizmos.DrawLine (transform.position, obstaculo.transform.position);*/
+
+        /*Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(obstaculo.transform.position, new Vector3(8,2,0));*/
+
+        Gizmos.color = Color.green;
+        //Gizmos.DrawWireSphere(obstaculo.transform.position, 2);
     }
 
     //Fuentes
