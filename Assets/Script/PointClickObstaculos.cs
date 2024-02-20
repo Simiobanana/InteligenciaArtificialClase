@@ -170,5 +170,7 @@ public class PointClickObstaculos : MonoBehaviour
 
     //Fuentes
     // PointClick-> https://www.youtube.com/watch?v=5KLV6QpSAdI
-    //
+    // Lo consulte con el equipo de Jesus,Pablo y David para ver como les habia quedado pero lo tenian muy distinto asi que solo me di una ligera idea
+    // Video i del profe -> https://youtu.be/oiRoIImlsEA
+    // Video 2 del profe -> https://youtu.be/71NIMTfaBKQ
 }
