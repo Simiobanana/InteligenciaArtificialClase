@@ -782,7 +782,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6abc3e1bb2012f14a8fa0c2d5bd98761, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RangoDeFlee: 2
+  RangoDeFlee: 3
   AplicandoFlee: 0
   maxSteeringForce: 1
   maxSpeed: 1

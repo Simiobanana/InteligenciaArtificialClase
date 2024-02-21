@@ -89,13 +89,15 @@ public class PointClickObstaculos : MonoBehaviour
                 //Se muestra en el inspector que si se esta aplicando el flee
                 AplicandoFlee = true;
             }//De caso contrario
-            else
-            {
-                //Solo de aplica el seek a la posicion del click
-                steeringForce = Seek(mouseWorldPos);
-                //Se muestra en el inspector que no se esta aplicando el flee
-                //AplicandoFlee = false;
-            }
+            
+        }
+
+        if (AplicandoFlee == false)
+        {
+            //Solo de aplica el seek a la posicion del click
+            steeringForce = Seek(mouseWorldPos);
+            //Se muestra en el inspector que no se esta aplicando el flee
+            //AplicandoFlee = false;
         }
         //steeringForce = Seek(mouseWorldPos);
         //steeringForce = Flee(obstaculo.transform.position);

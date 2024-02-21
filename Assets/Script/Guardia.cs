@@ -287,7 +287,7 @@ public class Guardia : MonoBehaviour
         return Seek(predictedPosition);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    /*private void OnCollisionEnter(Collision collision)
     {
         if(EstadoActual == Estados.Ataque)
         {
@@ -299,6 +299,18 @@ public class Guardia : MonoBehaviour
         }
         
         
+    }*/
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (EstadoActual == Estados.Ataque)
+        {
+            TargetGameObject.SetActive(false);
+            //Destroy(TargetGameObject);
+            CambiarEstado(Estados.Normal);
+            CronometroPursuit = 5;
+            //CrearNuevoAgente();
+        }
     }
 
     private void CrearNuevoAgente()
