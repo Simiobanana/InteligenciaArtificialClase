@@ -30,9 +30,9 @@ public class VisionCone : MonoBehaviour
         // (De lo contrario este angulo apareceria en otra ubicacion del entorno)
         return VisionObject.TransformDirection(
 
-            // Creamos un nuevo vector2 y ocupando trigonometria y formulas matematicas determinamos el coseno y seno del angulo total para
-            // posteriormente convertirlo a radianes y finalmente multiplicar ambos resultados por la distancia maxima de vision
-            new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad))) * distance;
+        // Creamos un nuevo vector2 y ocupando trigonometria y formulas matematicas determinamos el coseno y seno del angulo total para
+        // posteriormente convertirlo a radianes y finalmente multiplicar ambos resultados por la distancia maxima de vision
+        new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad))) * distance; 
     }
 
     private void Update()
@@ -42,7 +42,7 @@ public class VisionCone : MonoBehaviour
 
         // Creamos un vector 2 para el agente que servira para detectar cuando el mismo este dentro del angulo y rango de deteccion
         // del VisionObject
-        Vector2 agentVector = Agent.position - VisionObject.position;
+        Vector2 agentVector = Agent.position - VisionObject.position; 
 
         // Si el angulo que se fotma entre el agentVector y la posicion derecha del visionObject es menor a la mitad del visionAngle y ...
         if(Vector3.Angle(agentVector.normalized, VisionObject.right) < VisionAngle * 0.5f)
@@ -52,14 +52,16 @@ public class VisionCone : MonoBehaviour
             if(agentVector.magnitude < VisionDistance)
             {
                 detected=true;
-            }
+            } 
         }
+
     }
 
 
     // Utilizamos el metodo OnDrawGizmos para poder visualizar el rango y angulo de vision de nuestro objeto
     private void OnDrawGizmos()
     {
+        
         // Si nuestro anugulo de vision es igual o menor a 0 no se dibuja nada
         if (VisionAngle <= 0f) return;
         
@@ -82,7 +84,7 @@ public class VisionCone : MonoBehaviour
         Gizmos.DrawLine(VisionObject.position, (Vector2) VisionObject.position + p2);
 
         // Desde donde esta nuestro objeto tiramos un rayo en su direccion de la derecha con la finalidad de saber para donde esta apuntando
-        Gizmos.DrawRay(VisionObject.position, VisionObject.right * 4f);
+        Gizmos.DrawRay(VisionObject.position, VisionObject.right * 4f); 
     }
 
     // Fuentes:

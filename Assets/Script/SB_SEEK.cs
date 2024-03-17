@@ -14,6 +14,7 @@ public class SB_SEEK : MonoBehaviour
         Flee,  // 2
         Pursuit, // 3
         Evade,  // 4
+        Wander, // 5
         MAX     // 6
     };
 
@@ -41,9 +42,14 @@ public class SB_SEEK : MonoBehaviour
 
     // Variable donde guardamos la referencia al GameObject que es nuestro objetivo.
     private GameObject TargetGameObject;
-
     // Referencia al Rigidbody del TargetGameObject.
     private Rigidbody rbTargetGameObject;
+
+    private Vector3 TargetPosition = Vector3.zero;
+
+    // Variables para Wander.
+    public float sphereDistance = 1.0f;
+    public float sphereRadius = 5.0f;
 
     // Si nuestro objetivo está a X de distancia,
     // y nuestro agente se mueve a Y de distancia por segundo,
@@ -56,7 +62,7 @@ public class SB_SEEK : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //print("Funcion Start");
+        print("Funcion Start");
         rb = GetComponent<Rigidbody>();
 
         TargetGameObject = FindAnyObjectByType<SimpleAgent>().gameObject;
@@ -73,25 +79,18 @@ public class SB_SEEK : MonoBehaviour
     //}
 
     // Update is called once per frame
-    void Update()
+    protected void Update()
     {
         // Lo que esté dentro de la función update, se va a ejecutar cada que se pueda.
         // print("Funcion update");
 
         // Input.mousePosition // Nos da coordenadas en pixeles.
-        // LO TRABAJADO PREVIAMENTE CON EL PROFESOR ->
-        //mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition, Camera.MonoOrStereoscopicEye.Mono);
+        mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition, Camera.MonoOrStereoscopicEye.Mono);
 
-        //PROJECTO -> MOVER CON CLICK
-        //Si das click izquierdo
-        //if(Input.GetMouseButtonDown(0))
-        //{
-            //Se genera un punto en la pantalla con la posicion donde hiciste click con el mouse
-            //mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //}
+        mouseWorldPos.z = 0;  // la sobreescribimos con 0 para que no afecte los cálculos en 2D.
 
-        //mouseWorldPos.z = 0;  // la sobreescribimos con 0 para que no afecte los cálculos en 2D.
-
+        // print(this.name);
+        print(base.GetType());
 
         //velocity = 
 
@@ -139,6 +138,7 @@ public class SB_SEEK : MonoBehaviour
         // Aceleración Distancia/Tiempo^2
     }
 
+    int myCounter = 0;
     void FixedUpdate()
     {
         // Fixed: Fijo
@@ -182,6 +182,30 @@ public class SB_SEEK : MonoBehaviour
             case SteeringBehavior.Evade:
                 {
                     steeringForce = Evade(TargetGameObject.transform.position, rbTargetGameObject.velocity);
+                }
+                break;
+            case SteeringBehavior.Wander:
+                {
+                    //if (myCounter > 60)
+                    //{
+                    //    TargetPosition = new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), 0.0f);
+                    //    steeringForce = Seek(TargetPosition);
+                    //    myCounter = 0;
+                    //}
+                    //else
+                    //{
+                    //    myCounter++;
+                    //}
+
+                    // Lo primero es proyectar este círculo en frente de nuestro agente.
+                    // Cuál es el frente de nuestro agente?
+                    // gameObject.transform.forward
+                    Vector3 LookingDirection = rb.velocity.normalized;
+                    // a partir de la posición de nuestro agente, la esfera va a estar 
+                    // desplazada sphereDistance en la dirección de LookingDirection
+                    Vector3 spherePosition = gameObject.transform.position + LookingDirection * sphereDistance;
+                    Vector3 unitCircle = Random.insideUnitCircle;
+                    Vector3 TargetInsideSphere = spherePosition + (unitCircle * sphereRadius);
                 }
                 break;
             case SteeringBehavior.MAX:
@@ -299,8 +323,38 @@ public class SB_SEEK : MonoBehaviour
         // Esto es para verificar que Pursuit está funcionando adecuadamente.
         // Comprobamos que sí lo hace.
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(transform.position,
-            PredictPosition(TargetGameObject.transform.position, rbTargetGameObject.velocity));
+        //Gizmos.DrawLine(transform.position, 
+        //    PredictPosition(TargetGameObject.transform.position, rbTargetGameObject.velocity));
+
+        Gizmos.color = Color.white;
+        // Gizmos.DrawSphere(TargetPosition, 1);
+
+        if (rb != null)
+        {
+            Vector3 LookingDirection = rb.velocity.normalized;
+            // Esto de aquí nos va a dar una línea chiquita.
+            Gizmos.DrawLine(transform.position, transform.position + LookingDirection);
+
+            Vector3 spherePosition = transform.position + LookingDirection * sphereDistance;
+
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(transform.position, spherePosition);
+
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(spherePosition, sphereRadius);
+
+            // a partir de la posición de nuestro agente, la esfera va a estar 
+            // desplazada sphereDistance en la dirección de LookingDirection
+            // Vector3 spherePosition = gameObject.transform.position + LookingDirection * sphereDistance;
+            Vector3 unitCircle = Random.onUnitSphere;
+            // Punto en el círculo/esfera al cual vamos a hacer seek.
+            Vector3 TargetInsideSphere = spherePosition + (unitCircle * sphereRadius);
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(TargetInsideSphere, 1.0f);
+        }
+
+
 
 
     }
