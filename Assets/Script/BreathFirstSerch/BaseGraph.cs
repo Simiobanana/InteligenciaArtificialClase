@@ -13,11 +13,21 @@ public class Node
     // pero las classes sí. Probablemente se debe a que las Classes son siempre referencias (punteros) en C#.
     public Node parent;
 
+    //Agrego las coordenadas X y Y
+    public float X; 
+    public float Y; 
+
+
     public Node(string in_Id)
     {
         ID = in_Id;
         parent = null;
+        //Les establecemos un rango aleeatorio entre 0 y 10
+        X = Random.Range(0, 10);
+        Y = Random.Range(0, 10);
     }
+
+    
 
     //== es el operador de igualdad.
     //public static bool operator ==(Node lhs, Node rhs)
@@ -69,6 +79,8 @@ public class BaseGraph : MonoBehaviour
     public List<Edge> Edges = new List<Edge>();
     public List<Node> Nodes = new List<Node>();
 
+    // Ponemos el prefab del objeto que servira de visualizador para los nodos
+    public GameObject nodePrefab; 
     // La lista abierta nos permite guardar a cuáles nodos ya hemos llegado pero no hemos terminado de visitar a sus vecinos
     public Dictionary<Node, NodeState> NodeStateDict = new Dictionary<Node, NodeState>();
     // La lista cerrada nos permite guardar a los nodos que ya terminamos de explor
@@ -90,6 +102,7 @@ public class BaseGraph : MonoBehaviour
 
     private void GrafoDePrueba()
     {
+
         // Me faltaba ponerle el "public" al constructor!
         // Ponemos todos los nodos de nuestro diagrama.
         Node A = new Node("A");
@@ -150,7 +163,7 @@ public class BaseGraph : MonoBehaviour
         bool pathExists = ItDepthFirstSearch(H, D);
         if (pathExists)
         {
-            print("Sí hay un camino de H a D.");
+            print("Sí hay un camino de H a D. (DepthFirstSearch)");
             List<Node> pathToGoal = new List<Node>();
             Node currentNode = D;
             while (currentNode != null)
@@ -160,11 +173,42 @@ public class BaseGraph : MonoBehaviour
             }
             foreach (Node node in pathToGoal)
             {
-                print("El nodo: " + node.ID + " fue parte del camino a la meta");
+                print("El nodo: " + node.ID + " fue parte del camino a la meta (DepthFirstSearch)");
             }
         }
         else
-            print("No hay camino de H a D.");
+            print("No hay camino de H a D. (DepthFirstSearch");
+
+        //----------------------------------------------------------------------------------------------------
+        NodeStateDict[H] = NodeState.Open;
+        bool pathExistsBFS = ItBreadthFirstSearch(H, D);
+        if (pathExistsBFS)
+        {
+            print("Sí hay un camino de H a D (BreadthFirstSearch).");
+        }
+        else
+        {
+            print("No hay camino de H a D (BreadthFirstSerch).");
+        }
+
+        //Por cada nodo en los nodos
+        foreach (Node node in Nodes)
+        {
+            // Instanciar el prefab de nodo
+            GameObject nodeObject = Instantiate(nodePrefab, UnityEngine.Vector3.zero, UnityEngine.Quaternion.identity);
+
+            // Llamamos al script de NodeVisualizer y encontramos a todos los objetos con ese componente
+            NodeVisualizer visualizer = nodeObject.GetComponent<NodeVisualizer>();
+            if (visualizer != null)
+            {
+                //Ponemos la funcion para ponerles una ubicacion en x y Y
+                visualizer.SetPosition(node.X, node.Y);
+            }
+            else
+            {
+                Debug.Log("No se encontró el componente NodeVisualizer en el prefab de nodo.");
+            }
+        }
     }
 
     public bool ItDepthFirstSearch(Node Origin, Node Target)
@@ -235,8 +279,79 @@ public class BaseGraph : MonoBehaviour
         // no hay camino de origin a target.
         return false;
     }
+//-----------------------------------------------------------------------------------------------------------------------------------------
+    public bool ItBreadthFirstSearch(Node Origin, Node Target)
+    {
+        // Usamos una cola o lista por decirlo de alguna manera para BreadthFirstSearch
+        Queue<Node> queue = new Queue<Node>(); 
+        // Empezamos la lista desde el nodo origen
+        queue.Enqueue(Origin); 
 
+        //Mientras la lista tenga un contador mayor a 0...
+        while (queue.Count > 0) 
+        {
+            // Sacamos un nodo de la cola
+            Node currentNode = queue.Dequeue(); 
 
+            // Si llegamos al nodo objetivo, encontramos un camino
+            if (currentNode == Target)
+            {
+                //Mandamos a llamar a nuestra funcion de Grafo de prueba 2 para que se pueda imprimir (No lo llame en el start por que me salia error) 
+                GrafoDePureba2(Origin, Target);
+                return true;
+            }
+
+            // Marcamos el nodo como cerrado dado a que ya lo revisamos
+            NodeStateDict[currentNode] = NodeState.Closed;
+
+            // Actualizamos los nodos vecinos del nodo actual
+            List<Edge> currentNeighbors = FindNeighbors(currentNode);
+            // Visita a cada uno de ellos, hasta que se acaben o hasta que encontremos el objetivo.
+            foreach (Edge e in currentNeighbors)
+            {
+                // Checamos cuál de los dos nodos que esta arista conecta no es el CurrentNode.
+                Node neighborNode = (currentNode == e.a) ? e.b : e.a;
+
+                // Si el vecino no ha sido visitado aún, lo añadimos a la cola para visitarlo
+                if (NodeStateDict[neighborNode] == NodeState.Unknown)
+                {
+                    // Añadimos al nodo vecino a la cola que nos falta por visitar
+                    queue.Enqueue(neighborNode);
+                    // Marcamos el vecino como que esta abierto justamente para que lo podamos visitar
+                    NodeStateDict[neighborNode] = NodeState.Open;
+                    // Establecemos el nodo actual como el padre del vecino para visitarlo
+                    neighborNode.parent = currentNode;
+                }
+            }
+        }
+
+        // No se encontró un camino
+        return false;
+    }
+
+    private void GrafoDePureba2(Node origin, Node target)
+    {
+        // Prueba de BreathFirstSearch donde debería haber un camino
+        List<Node> path = new List<Node>();
+        Node currentNode = target;
+
+        // Reconstruimos el camino recorrido desde el nodo objetivo hasta el origen
+        while (currentNode != null)
+        {
+            path.Add(currentNode);
+            currentNode = currentNode.parent;
+        }
+        //Como en el ejercicio nos piden que el camino este invertido lo invertimos
+        path.Reverse(); // Invertimos el camino para imprimirlo en el orden correcto
+
+        // Imprimimos el camino
+        foreach (Node node in path)
+        {
+            print("El nodo: " + node.ID + " fue parte del camino a la meta. (BreathFirstSerch)");
+        }
+    }
+
+//------------------------------------------------------------------------------------------------------------------------
     public bool DepthFirstSearch(Node Current, Node Target)
     {
         // Cuando tú te paras en un nodo, lo primero que tienes que hacer es si ya está en la lista cerrada.
@@ -312,4 +427,8 @@ public class BaseGraph : MonoBehaviour
     {
 
     }
+    //REFERENCIAS:
+    // Codigo usado en clase
+    // https://docs.unity3d.com/355/Documentation/ScriptReference/Array.Reverse.html
+    //
 }
