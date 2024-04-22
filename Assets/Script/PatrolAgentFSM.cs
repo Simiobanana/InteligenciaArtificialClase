@@ -164,7 +164,7 @@ public class PatrolAgentFSM : NaiveFSM
         _AlertState.Init(VisionDistance * AlertVisionDistanceMultiplier, VisionAngle * AlertVisionAngleMultiplier,
             TimeSinceLastSeenTreshold, SpeedWhileCheckingLastKnownLocation);
 
-        _AttackState.Init(AttackVisionAngleMultiplier, AttackVisionDistanceMultiplier);
+        _AttackState.Init(VisionAngle * AttackVisionAngleMultiplier, VisionDistance * AttackVisionDistanceMultiplier);
     }
 
     protected override NaiveFSMState GetInitialState()
@@ -180,7 +180,22 @@ public class PatrolAgentFSM : NaiveFSM
     // Entonces hay que pasarle las variables de cada estado al mandarla a llamar.
     public bool CheckFieldOfVision(float in_VisionDist, float in_VisionAngle)
     {
-        CambiarAnimaciones();
+        // Verificar si el estado actual es de patrullaje y actualizar el rango de la luz
+        if (_PatrolState != null && _CurrentState == _PatrolState)
+        {
+            UpdateLightRange(_PatrolState.VisionDistance);
+        }
+        // Verificar si el estado actual es de alerta y actualizar el rango de la luz
+        else if (_AlertState != null && _CurrentState == _AlertState)
+        {
+            UpdateLightRange(_AlertState.VisionDistance);
+        }
+        // Verificar si el estado actual es de ataque y actualizar el rango de la luz
+        else if (_AttackState != null && _CurrentState == _AttackState)
+        {
+            UpdateLightRange(_AttackState.AttackVisionDistanceMultiplier);
+        }
+        //CambiarAnimaciones();
         // Esta función regresa dos cosas, un booleano que dice: sí ví al jugador o no;
         // además, si sí lo vimos, actualizará la variable _LastKnownPlayerPosition.
         _DetectedPlayer = false; // por defecto la ponemos como falso.
@@ -219,7 +234,14 @@ public class PatrolAgentFSM : NaiveFSM
         return true;
     }
 
-    private void CambiarAnimaciones()
+    private void UpdateLightRange(float visionDistance)
+    {
+        // Ajustar el rango de la luz según el alcance del cono de visión
+        _light.range = visionDistance;
+    }
+
+
+    /*private void CambiarAnimaciones()
     {
         if(_DetectedPlayer == true)
         {
@@ -230,15 +252,44 @@ public class PatrolAgentFSM : NaiveFSM
             _Animator.SetBool("Patrullando", false);
         }
 
-    }
-        
+    }*/
+
 
     private void OnDrawGizmos()
     {
-        if (_DetectedPlayer)
+        if (_PatrolState != null)
         {
-            
+            Gizmos.color = Color.green;
+            DrawVisionCone(_PatrolState.VisionDistance, _PatrolState.VisionAngle);
         }
+
+        if (_AlertState != null && _CurrentState == _AlertState)
+        {
+            Gizmos.color = Color.yellow;
+            DrawVisionCone(_AlertState.VisionDistance, _AlertState.VisionAngle);
+        }
+
+        if (_AttackState != null && _CurrentState == _AttackState)
+        {
+            Gizmos.color = Color.red;
+            DrawVisionCone(_AttackState.AttackVisionDistanceMultiplier, _AttackState.AttackVisionAngleMultiplier);
+        }
+    }
+
+    private void DrawVisionCone(float distance, float angle)
+    {
+        float halfAngle = angle * 0.5f;
+        Quaternion leftRayRotation = Quaternion.AngleAxis(-halfAngle, Vector3.up);
+        Quaternion rightRayRotation = Quaternion.AngleAxis(halfAngle, Vector3.up);
+
+        Vector3 startPoint = transform.position;
+
+        Vector3 leftRayDirection = leftRayRotation * transform.forward;
+        Vector3 rightRayDirection = rightRayRotation * transform.forward;
+
+        Gizmos.DrawRay(startPoint, leftRayDirection * distance);
+        Gizmos.DrawRay(startPoint, rightRayDirection * distance);
+        Gizmos.DrawRay(startPoint + leftRayDirection * distance, rightRayDirection * distance - leftRayDirection * distance);
     }
 
 }

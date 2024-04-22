@@ -20,10 +20,10 @@ public class NaiveAlertState : NaiveFSMState
     private PatrolAgentFSM PatrolFSMRef = null;
     public bool Moviendose = false;
 
-    private float VisionDistance;
-    private float VisionAngle;
+    public float VisionDistance;
+    public float VisionAngle;
 
-    private float TimeDetectingPlayerBeforeEnteringAttack;
+    private float TimeDetectingPlayerBeforeEnteringAttack = 2f;
     private float AccumulatedTimeDetectingPlayerBeforeEnteringAttack;
 
     //  cierto tiempo de la última vez que detectó al jugador, es decir, en qué momento en el tiempo se detectó.

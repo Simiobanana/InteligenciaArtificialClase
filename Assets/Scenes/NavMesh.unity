@@ -19673,7 +19673,7 @@ MonoBehaviour:
   VisionAngle: 45
   VisionDistance: 20
   RotationAngle: 45
-  TimeBeforeRotating: 3
+  TimeBeforeRotating: 4
   TimeDetectingPlayerBeforeEnteringAlert: 2
   AlertVisionAngleMultiplier: 1.2
   AlertVisionDistanceMultiplier: 1.2

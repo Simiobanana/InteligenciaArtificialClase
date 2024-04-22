@@ -13,8 +13,8 @@ public class NaivePatrolState : NaiveFSMState
     //public float VisionDistance;
     //public bool DetectedPlayer;
 
-    private float VisionAngle;
-    private float VisionDistance;
+    public float VisionAngle;
+    public float VisionDistance;
     public GameObject agentTransform;
 
     // Variables Exclusivas de este estado.
@@ -52,6 +52,7 @@ public class NaivePatrolState : NaiveFSMState
     {
         // 
         base.Enter();
+        PatrolFSMRef._Animator.SetBool("Patrullando", true);
         agentTransform = GameObject.Find("Patroller");
         Debug.Log("Entré al estado de Patrullaje.");
         // Acá ya puedo hacer lo que esta clase hija específicamente tiene que hacer
@@ -80,6 +81,7 @@ public class NaivePatrolState : NaiveFSMState
                 // esto nos permite acceder a las variables que tiene esa clase específica, en este caso, al estado de Alerta al que
                 // queremos pasar, que lo obtenemos a través de "AlertStateRef".
                 NaiveAlertState AlertStateInstance = PatrolFSMRef.AlertStateRef;
+                PatrolFSMRef._Animator.SetBool("Patrullando", false);
                 _FSM.ChangeState(AlertStateInstance);
                 return; // Damos return siempre después del change state, para evitar que cualquier otra cosa 
                 // del update se fuera a ejecutar.
@@ -88,7 +90,7 @@ public class NaivePatrolState : NaiveFSMState
 
         // Dónde pondríamos la parte de rotar al patrullero cada cierto tiempo?
         AccumulatedTimeBeforeRotating += Time.deltaTime;
-        if (AccumulatedTimeBeforeRotating >= 2f)
+        if (AccumulatedTimeBeforeRotating >= 4f)
         {
             RotateAgent();
             AccumulatedTimeBeforeRotating = 0.0f; // Reiniciamos el contador de tiempo

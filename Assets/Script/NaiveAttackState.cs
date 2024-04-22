@@ -6,9 +6,15 @@ using UnityEngine;
 public class NaiveAttackState : NaiveFSMState
 {
     private PatrolAgentFSM PatrolFSMRef = null;
+    //Variable para tener control del rango de distancia con el jugador
+    public GameObject agent;
 
+    //Variables que manejan la distancia y angulo de vision
     public float AttackVisionAngleMultiplier;
     public float AttackVisionDistanceMultiplier;
+    //Variables para regresar a otro estado
+    public float TimeToChangeState;
+    public float TimeBeforeChangeState = 0f;
 
 
     public NaiveAttackState(NaiveFSM FSM)
@@ -27,42 +33,51 @@ public class NaiveAttackState : NaiveFSMState
     public override void Enter()
     {
         base.Enter();
-
-        // Iniciar la animación de ataque, efectos de sonido, etc.
+        TimeToChangeState = 5f;
+        PatrolFSMRef._Animator.SetBool("Ataque", true);
+        PatrolFSMRef._Animator.SetBool("Alerta", true);
+        agent = GameObject.Find("Player");
+        PatrolFSMRef._light.color = Color.red;
     }
 
     public override void Update()
     {
         base.Update();
+        Vector3 directionToPlayer = agent.transform.position - _FSM.transform.position;
+        PatrolFSMRef._light.color = Color.red;
+        PatrolFSMRef._NavMeshAgent.SetDestination(agent.transform.position);
 
-        // Perseguir al jugador
-        Vector3 directionToPlayer = PatrolFSMRef.LastKnownPlayerPosition - _FSM.transform.position;
-        PatrolFSMRef._NavMeshAgent.SetDestination(PatrolFSMRef.LastKnownPlayerPosition);
+        TimeToChangeState -= Time.deltaTime;
+        if (TimeToChangeState <= TimeBeforeChangeState)
+        {
+            NaivePatrolState AlertStateInstance = PatrolFSMRef.PatrolStateRef;
+            _FSM.ChangeState(AlertStateInstance);
+            return;
+        }
+       
 
-        // Si el agente alcanza al jugador, destruirlo y cambiar al estado de patrullaje
         if (directionToPlayer.magnitude < 1.0f)
         {
+            NaivePatrolState PatrolStateInstance = PatrolFSMRef.PatrolStateRef;
+            _FSM.ChangeState(PatrolStateInstance);
             DestroyPlayer();
-            NaivePatrolState PatrolStateInstance = PatrolFSMRef.PatrolStateRef;
-            _FSM.ChangeState(PatrolStateInstance);
             return;
         }
-        {
-            NaivePatrolState PatrolStateInstance = PatrolFSMRef.PatrolStateRef;
-            _FSM.ChangeState(PatrolStateInstance);
-            return;
-        }
+
     }
 
     public override void Exit()
     {
+        PatrolFSMRef._Animator.SetBool("Ataque", false);
+        PatrolFSMRef._Animator.SetBool("Alerta", false);
         base.Exit();
-        // Detener la animación de ataque, efectos de sonido, etc.
+
     }
 
     private void DestroyPlayer()
     {
-        // Aquí puedes desactivar, destruir, teletransportar al jugador, etc.
+        
+        agent.SetActive(false);
         Debug.Log("El jugador ha sido destruido.");
     }
 }
