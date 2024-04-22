@@ -69,6 +69,7 @@ public class NaiveAlertState : NaiveFSMState
     {
         base.Enter();
         LastTimePlayerSeen = Time.realtimeSinceStartup;
+        //Establecemos la animacion a usar
         PatrolFSMRef._Animator.SetBool("Alerta", true);
         // Tal vez Time.time es una mejor opción que: Time.realtimeSinceStartup
         AccumulatedTimeDetectingPlayerBeforeEnteringAttack = 0.0f;
@@ -184,6 +185,7 @@ public class NaiveAlertState : NaiveFSMState
 
     public override void Exit()
     {
+        //Apagamos la animacion
         PatrolFSMRef._Animator.SetBool("Alerta", false);
         base.Exit();
     }

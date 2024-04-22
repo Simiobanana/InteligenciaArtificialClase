@@ -137,6 +137,7 @@ public class PatrolAgentFSM : NaiveFSM
     {
         //_Renderer = GetComponent<MeshRenderer>();
         _PlayerGameObject = GameObject.Find("Player");
+        //Obtenemos el animator que en mi caso esta en el parent
         _Animator = GetComponentInParent<Animator>();
         
 
@@ -164,6 +165,7 @@ public class PatrolAgentFSM : NaiveFSM
         _AlertState.Init(VisionDistance * AlertVisionDistanceMultiplier, VisionAngle * AlertVisionAngleMultiplier,
             TimeSinceLastSeenTreshold, SpeedWhileCheckingLastKnownLocation);
 
+        // Añadí los multiplicadores de ángulo y distancia a la inicialización de los estados.
         _AttackState.Init(VisionAngle * AttackVisionAngleMultiplier, VisionDistance * AttackVisionDistanceMultiplier);
     }
 
@@ -185,12 +187,10 @@ public class PatrolAgentFSM : NaiveFSM
         {
             UpdateLightRange(_PatrolState.VisionDistance);
         }
-        // Verificar si el estado actual es de alerta y actualizar el rango de la luz
         else if (_AlertState != null && _CurrentState == _AlertState)
         {
             UpdateLightRange(_AlertState.VisionDistance);
         }
-        // Verificar si el estado actual es de ataque y actualizar el rango de la luz
         else if (_AttackState != null && _CurrentState == _AttackState)
         {
             UpdateLightRange(_AttackState.AttackVisionDistanceMultiplier);
@@ -199,6 +199,8 @@ public class PatrolAgentFSM : NaiveFSM
         // Esta función regresa dos cosas, un booleano que dice: sí ví al jugador o no;
         // además, si sí lo vimos, actualizará la variable _LastKnownPlayerPosition.
         _DetectedPlayer = false; // por defecto la ponemos como falso.
+
+        //Establecemos que el color de la luz sea verde normalmente cuando esta en falso el detected player
         _light.color = Color.green;
         //_Renderer.material.color = new Color(1, 0, 0, 1);
         Vector3 AgentToTargetVector = (_PlayerGameObject.transform.position - transform.position);
@@ -228,7 +230,7 @@ public class PatrolAgentFSM : NaiveFSM
         // Si sí vimos al jugador, actualizar la variable de la última posición conocida.
         _LastKnownPlayerPosition = _PlayerGameObject.transform.position;
         _DetectedPlayer = true; // solo cambia a verdadera aquí. 
-        
+        //Cambiamos la luz a amarillo cuando detected player es yellow
         _light.color = Color.yellow;
         //_Renderer.material.color = new Color(1, 0, 1, 1);
         return true;
@@ -254,7 +256,7 @@ public class PatrolAgentFSM : NaiveFSM
 
     }*/
 
-
+    //Dibujamos los conos de vision que se ven afectados por los estados
     private void OnDrawGizmos()
     {
         if (_PatrolState != null)
@@ -276,6 +278,7 @@ public class PatrolAgentFSM : NaiveFSM
         }
     }
 
+    //Asi mismo como se hizo en el primer y segundo parcial, dividimos el angulo de vision en 2 para facilitar la deteccion
     private void DrawVisionCone(float distance, float angle)
     {
         float halfAngle = angle * 0.5f;

@@ -15,6 +15,8 @@ public class NaivePatrolState : NaiveFSMState
 
     public float VisionAngle;
     public float VisionDistance;
+
+    //Declaramos un objeto para poder controlar la rotacion del patrullero
     public GameObject agentTransform;
 
     // Variables Exclusivas de este estado.
@@ -52,7 +54,9 @@ public class NaivePatrolState : NaiveFSMState
     {
         // 
         base.Enter();
+        //Establecemos la animacion a usar
         PatrolFSMRef._Animator.SetBool("Patrullando", true);
+        PatrolFSMRef._Animator.SetBool("Alerta", false);
         agentTransform = GameObject.Find("Patroller");
         Debug.Log("Entré al estado de Patrullaje.");
         // Acá ya puedo hacer lo que esta clase hija específicamente tiene que hacer
@@ -81,6 +85,7 @@ public class NaivePatrolState : NaiveFSMState
                 // esto nos permite acceder a las variables que tiene esa clase específica, en este caso, al estado de Alerta al que
                 // queremos pasar, que lo obtenemos a través de "AlertStateRef".
                 NaiveAlertState AlertStateInstance = PatrolFSMRef.AlertStateRef;
+                //Desactivamos la animacion al pasar al estado de alerta
                 PatrolFSMRef._Animator.SetBool("Patrullando", false);
                 _FSM.ChangeState(AlertStateInstance);
                 return; // Damos return siempre después del change state, para evitar que cualquier otra cosa 
@@ -89,11 +94,14 @@ public class NaivePatrolState : NaiveFSMState
         }
 
         // Dónde pondríamos la parte de rotar al patrullero cada cierto tiempo?
+        //Le añadimos tiempo a la variable de el tiempo acumulado antes de rotar
         AccumulatedTimeBeforeRotating += Time.deltaTime;
+        //una vez que el tiempo sea mayor o igual a la cantidad deseada rotaremos el agente
         if (AccumulatedTimeBeforeRotating >= 4f)
         {
             RotateAgent();
-            AccumulatedTimeBeforeRotating = 0.0f; // Reiniciamos el contador de tiempo
+            // Reiniciamos el contador de tiempo
+            AccumulatedTimeBeforeRotating = 0.0f; 
             Debug.Log("Rotando");
         }
 

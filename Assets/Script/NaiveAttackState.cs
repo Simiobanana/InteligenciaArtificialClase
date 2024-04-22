@@ -24,6 +24,7 @@ public class NaiveAttackState : NaiveFSMState
         PatrolFSMRef = ((PatrolAgentFSM)_FSM);
     }
 
+    //Inicializamos la distancia y angulo de vision de este estado en la maquina de estados para que cambie
     public void Init(float in_AttackVisionAngleMultiplier, float in_AttackVisionDistanceMultiplier)
     {
         AttackVisionAngleMultiplier = in_AttackVisionAngleMultiplier;
@@ -33,9 +34,11 @@ public class NaiveAttackState : NaiveFSMState
     public override void Enter()
     {
         base.Enter();
+        //Inicializamos la variable de cuanto tiempo tardara en perder el estado de ataque
         TimeToChangeState = 5f;
+        //Inicializamos la animacion al entrar a este estado
         PatrolFSMRef._Animator.SetBool("Ataque", true);
-        PatrolFSMRef._Animator.SetBool("Alerta", true);
+        //PatrolFSMRef._Animator.SetBool("Alerta", true);
         agent = GameObject.Find("Player");
         PatrolFSMRef._light.color = Color.red;
     }
@@ -43,11 +46,17 @@ public class NaiveAttackState : NaiveFSMState
     public override void Update()
     {
         base.Update();
+        //Establecemos para donde se va a dirigir mi personaje en el estado de ataque
         Vector3 directionToPlayer = agent.transform.position - _FSM.transform.position;
+        //Establecemos la luz roja
         PatrolFSMRef._light.color = Color.red;
+        //Aplicamos el navmesh cuando se vaya en direccion a mi jugador
         PatrolFSMRef._NavMeshAgent.SetDestination(agent.transform.position);
 
+        //Empezamos a hacer que corra el timmpo para regresar de estado
         TimeToChangeState -= Time.deltaTime;
+
+        //Si se acaba el tiempo regresa al estado de alerta
         if (TimeToChangeState <= TimeBeforeChangeState)
         {
             NaivePatrolState AlertStateInstance = PatrolFSMRef.PatrolStateRef;
@@ -55,7 +64,7 @@ public class NaiveAttackState : NaiveFSMState
             return;
         }
        
-
+        //Si la distancia de la direccion a la que vamos con el jugador es menor a una unidad de unity destruye el personaje
         if (directionToPlayer.magnitude < 1.0f)
         {
             NaivePatrolState PatrolStateInstance = PatrolFSMRef.PatrolStateRef;
@@ -68,15 +77,16 @@ public class NaiveAttackState : NaiveFSMState
 
     public override void Exit()
     {
+        //Salimos de las animacioes
         PatrolFSMRef._Animator.SetBool("Ataque", false);
-        PatrolFSMRef._Animator.SetBool("Alerta", false);
+        PatrolFSMRef._Animator.SetBool("Alerta", true);
         base.Exit();
 
     }
 
     private void DestroyPlayer()
     {
-        
+        //Apagas a mi personaje
         agent.SetActive(false);
         Debug.Log("El jugador ha sido destruido.");
     }
