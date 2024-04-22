@@ -25,8 +25,11 @@ public class PatrollerController : MonoBehaviour
             Debug.Log("Se pulso la Q");
         }
         else if (Input.GetKeyDown(KeyCode.E))
+        {
             animator.SetTrigger("E");
             Debug.Log("Se pulso la E");
+        }
+            
 
         
     }
