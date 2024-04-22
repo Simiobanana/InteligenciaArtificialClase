@@ -60,6 +60,7 @@ public class NaiveAttackState : NaiveFSMState
         if (TimeToChangeState <= TimeBeforeChangeState)
         {
             NaivePatrolState AlertStateInstance = PatrolFSMRef.PatrolStateRef;
+            PatrolFSMRef._NavMeshAgent.SetDestination(PatrolFSMRef.InitialPatrolPosition);
             _FSM.ChangeState(AlertStateInstance);
             return;
         }
@@ -68,6 +69,7 @@ public class NaiveAttackState : NaiveFSMState
         if (directionToPlayer.magnitude < 1.0f)
         {
             NaivePatrolState PatrolStateInstance = PatrolFSMRef.PatrolStateRef;
+            PatrolFSMRef._NavMeshAgent.SetDestination(PatrolFSMRef.InitialPatrolPosition);
             _FSM.ChangeState(PatrolStateInstance);
             DestroyPlayer();
             return;

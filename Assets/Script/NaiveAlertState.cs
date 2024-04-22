@@ -23,7 +23,7 @@ public class NaiveAlertState : NaiveFSMState
     public float VisionDistance;
     public float VisionAngle;
 
-    private float TimeDetectingPlayerBeforeEnteringAttack = 2f;
+    private float TimeDetectingPlayerBeforeEnteringAttack = 5f;
     private float AccumulatedTimeDetectingPlayerBeforeEnteringAttack;
 
     //  cierto tiempo de la última vez que detectó al jugador, es decir, en qué momento en el tiempo se detectó.
@@ -72,7 +72,9 @@ public class NaiveAlertState : NaiveFSMState
         //Establecemos la animacion a usar
         PatrolFSMRef._Animator.SetBool("Alerta", true);
         // Tal vez Time.time es una mejor opción que: Time.realtimeSinceStartup
+        TimeDetectingPlayerBeforeEnteringAttack = 3.0f;
         AccumulatedTimeDetectingPlayerBeforeEnteringAttack = 0.0f;
+        PatrolFSMRef._light.color = Color.yellow;
         _currentSubState = AlertSubState.Stopped; // Iniciamos en el subestado Stopped siempre.
     }
 
@@ -81,13 +83,15 @@ public class NaiveAlertState : NaiveFSMState
     {
         // base.Update();
         // Time.realtimeSinceStartup
-
+        
         if (_currentSubState == AlertSubState.Stopped)
         {
+            
+            AccumulatedTimeDetectingPlayerBeforeEnteringAttack += Time.deltaTime;
             // Aquí tendríamos la parte que ya conocemos sobre pasar al estado de Ataque
             // Si sí estamos viendo al jugador, hacemos lo siguiente:
             // tenemos que estar en el subestado Stopped para seguir seguir acumulando este tiempo.
-            AccumulatedTimeDetectingPlayerBeforeEnteringAttack += Time.deltaTime;
+
             if (AccumulatedTimeDetectingPlayerBeforeEnteringAttack > TimeDetectingPlayerBeforeEnteringAttack)
             {
                 PatrolAgentFSM SpecificFSM = (PatrolAgentFSM)_FSM;
@@ -137,19 +141,21 @@ public class NaiveAlertState : NaiveFSMState
             // Reinicializar las variables o valores necesarios.
             // por consistencia, si cambiamos de subestados, también vamos a llamar return, como si 
             // fueran estados grandes y no subestados.
-
             // Tenemos que checar si ya llegamos a la posición deseada (que es la última posicíón conocida)
             // Le damos rango de tolerancia a esta distancia entre nuestra posición y la última posición conocida
             float dist = Vector3.Distance(_FSM.transform.position, PatrolFSMRef.LastKnownPlayerPosition);
             if (dist < DistanceToGoalTolerance)  // DE HECHO, no sería necesario este Tolerance, porque el NavMesh ya tiene un valor para esto.
             {
-                // Entonces ya estamos lo suficientemente cerca.
-                // Entonces ya nos podemos empezar a regresar a la InitialPatrolPosition
-                // Le pondríamos al NavMesh que su "destination" es esa initial Patrol position.
-                PatrolFSMRef._NavMeshAgent.SetDestination(PatrolFSMRef.InitialPatrolPosition);
-                _currentSubState = AlertSubState.ReturningToPosition;
-                return;
+                    // Entonces ya estamos lo suficientemente cerca.
+                    // Entonces ya nos podemos empezar a regresar a la InitialPatrolPosition
+                    // Le pondríamos al NavMesh que su "destination" es esa initial Patrol position.
+                    PatrolFSMRef._NavMeshAgent.SetDestination(PatrolFSMRef.InitialPatrolPosition);
+                    _currentSubState = AlertSubState.ReturningToPosition;
+                    return;
             }
+        
+            
+
         }
         if (_currentSubState == AlertSubState.ReturningToPosition)
         {
@@ -180,6 +186,7 @@ public class NaiveAlertState : NaiveFSMState
         // entonces el agente se regresará hacia el punto de patrullaje.
         // Si llega al punto de patrullaje y sigue sin detectar al jugador, 
         // entonces pasará al estado de patrullaje.
+
 
     }
 

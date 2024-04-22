@@ -10316,7 +10316,7 @@ Light:
   m_InnerSpotAngle: 19
   m_CookieSize: 1.36
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -19671,7 +19671,7 @@ MonoBehaviour:
   _light: {fileID: 961956621}
   _Animator: {fileID: 953100260}
   VisionAngle: 45
-  VisionDistance: 20
+  VisionDistance: 10
   RotationAngle: 45
   TimeBeforeRotating: 4
   TimeDetectingPlayerBeforeEnteringAlert: 2

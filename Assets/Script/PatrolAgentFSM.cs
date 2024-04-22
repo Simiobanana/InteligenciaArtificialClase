@@ -110,7 +110,7 @@ public class PatrolAgentFSM : NaiveFSM
     [Range(0.25f, 20.0f)]
     public float TimeBeforeRotating = 3.0f;
     [Range(0.1f, 10.0f)]
-    public float TimeDetectingPlayerBeforeEnteringAlert = 2.0f;
+    public float TimeDetectingPlayerBeforeEnteringAlert = 1.0f;
 
 
     // Grupo de variables para el estado de Alerta (NaiveAlertState)
@@ -230,8 +230,8 @@ public class PatrolAgentFSM : NaiveFSM
         // Si sí vimos al jugador, actualizar la variable de la última posición conocida.
         _LastKnownPlayerPosition = _PlayerGameObject.transform.position;
         _DetectedPlayer = true; // solo cambia a verdadera aquí. 
-        //Cambiamos la luz a amarillo cuando detected player es yellow
-        _light.color = Color.yellow;
+        //Cambiamos la luz a amarillo cuando detected player es true
+        _light.color = Color.magenta;
         //_Renderer.material.color = new Color(1, 0, 1, 1);
         return true;
     }
