@@ -54,6 +54,7 @@ public class NaivePatrolState : NaiveFSMState
     {
         // 
         base.Enter();
+        PatrolFSMRef._light.color = Color.green;
         //Establecemos la animacion a usar
         PatrolFSMRef._Animator.SetBool("Patrullando", true);
         PatrolFSMRef._Animator.SetBool("Alerta", false);
@@ -99,7 +100,7 @@ public class NaivePatrolState : NaiveFSMState
         //una vez que el tiempo sea mayor o igual a la cantidad deseada rotaremos el agente
         if (AccumulatedTimeBeforeRotating >= 4f)
         {
-            RotateAgent();
+            //RotateAgent();
             // Reiniciamos el contador de tiempo
             AccumulatedTimeBeforeRotating = 0.0f; 
             Debug.Log("Rotando");

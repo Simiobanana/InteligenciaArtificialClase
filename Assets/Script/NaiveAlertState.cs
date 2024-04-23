@@ -70,7 +70,7 @@ public class NaiveAlertState : NaiveFSMState
         base.Enter();
         LastTimePlayerSeen = Time.realtimeSinceStartup;
         //Establecemos la animacion a usar
-        PatrolFSMRef._Animator.SetBool("Alerta", true);
+        
         // Tal vez Time.time es una mejor opción que: Time.realtimeSinceStartup
         TimeDetectingPlayerBeforeEnteringAttack = 3.0f;
         AccumulatedTimeDetectingPlayerBeforeEnteringAttack = 0.0f;
@@ -83,11 +83,16 @@ public class NaiveAlertState : NaiveFSMState
     {
         // base.Update();
         // Time.realtimeSinceStartup
+        CheckFOV();
         
         if (_currentSubState == AlertSubState.Stopped)
         {
             
-            AccumulatedTimeDetectingPlayerBeforeEnteringAttack += Time.deltaTime;
+            if(PatrolFSMRef.DetectedPlayer)
+            {
+                AccumulatedTimeDetectingPlayerBeforeEnteringAttack += Time.deltaTime;
+            }
+            
             // Aquí tendríamos la parte que ya conocemos sobre pasar al estado de Ataque
             // Si sí estamos viendo al jugador, hacemos lo siguiente:
             // tenemos que estar en el subestado Stopped para seguir seguir acumulando este tiempo.
@@ -135,6 +140,7 @@ public class NaiveAlertState : NaiveFSMState
         }
         if (_currentSubState == AlertSubState.GoingToCheck)
         {
+            PatrolFSMRef._Animator.SetBool("Alerta", true);
             // Si vemos otra vez al jugador, inmediatamente pasamos al estado de Stopped.
             // if( detected)
             // Then: _currentSubState = AlertSubState.Stopped;
@@ -146,6 +152,7 @@ public class NaiveAlertState : NaiveFSMState
             float dist = Vector3.Distance(_FSM.transform.position, PatrolFSMRef.LastKnownPlayerPosition);
             if (dist < DistanceToGoalTolerance)  // DE HECHO, no sería necesario este Tolerance, porque el NavMesh ya tiene un valor para esto.
             {
+                    
                     // Entonces ya estamos lo suficientemente cerca.
                     // Entonces ya nos podemos empezar a regresar a la InitialPatrolPosition
                     // Le pondríamos al NavMesh que su "destination" es esa initial Patrol position.
@@ -159,6 +166,7 @@ public class NaiveAlertState : NaiveFSMState
         }
         if (_currentSubState == AlertSubState.ReturningToPosition)
         {
+            PatrolFSMRef._Animator.SetBool("Alerta", true);
             // Seguir checando a ver si de camino a la posición inicial vemos al infiltrador.
             // Si sí lo vemos, nos vamos al estado de stopped
             // y actualizamos el valor de LastKnownLocation
@@ -166,6 +174,7 @@ public class NaiveAlertState : NaiveFSMState
             // REEMPLAZAR EL 1.0F CON UNA VARIABLE!
             if (Vector3.Distance(_FSM.transform.position, PatrolFSMRef.InitialPatrolPosition) < DistanceToGoalTolerance)
             {
+                
                 // Si no, nada más tenemos que checar que lleguemos a la posición inicial de patrullaje
                 // y cuando lo hagamos, pasamos al estado de patrullaje.
                 NaivePatrolState PatrolStateInstance = PatrolFSMRef.PatrolStateRef;

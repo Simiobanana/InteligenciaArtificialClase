@@ -4,110 +4,81 @@ using UnityEngine;
 
 public class AgentController : MonoBehaviour
 {
-    public CharacterController ControladorDeAgente;
-    public float velocidadDeMovimiento = 5f;
-    public float Gravedad = 9.8f;
-    public float fallVelocity;
-    public float FuerzaDeSalto=0f;
-    public float VelocidadDeRotacion = 20f;
-    public bool Agachado=false;
+    private CharacterController characterController;
+    public Transform camera;
+    public float speed = 4;
+    public float runSpeed = 8;
+    private float gravity = -9.8f;
+
+    // Declaro el animator
+    private Animator animator;
+    //bool Moviendose;
 
 
-    private Vector3 movePlayer;
-    public Camera cam;
-    private Vector3 camForward;
-    private Vector3 camRigth;
-
-    Animator animator;
-
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        animator = GetComponent<Animator>();   
+        characterController = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+        //Moviendose = false;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        float MovimientoHorizontalX = Input.GetAxis("Horizontal");
-        float MovimientoHorizontalZ = Input.GetAxis("Vertical");
-        Vector3 DireccionDeMovimiento = new Vector3(MovimientoHorizontalX, 0, MovimientoHorizontalZ);
-        DireccionDeMovimiento.Normalize();
+        // Defino que si el personaje no se esta moviendo su booleano sea falso y asi se inicie la animacion de idle
+        animator.SetBool("Moviendose", false);
 
-        camDirection();
+        float hor = Input.GetAxis("Horizontal");
+        float ver = Input.GetAxis("Vertical");
+        Vector3 movement = Vector3.zero;
+        float movementSpeed = 0;
 
-        movePlayer = DireccionDeMovimiento.x * camRigth + DireccionDeMovimiento.z * camForward;
-
-        movePlayer = movePlayer * velocidadDeMovimiento;
-
-
-        //MOVIMIENTO
-        if (DireccionDeMovimiento.magnitude <= 0.1)
+        if (hor != 0 || ver != 0)
         {
-            animator.SetBool("Moviendose", false);
+            Vector3 forward = camera.forward;
+            forward.y = 0;
+            forward.Normalize();
+
+            Vector3 right = camera.right;
+            right.y = 0;
+            right.Normalize();
+
+            Vector3 direction = forward * ver + right * hor;
+            movementSpeed = Mathf.Clamp01(direction.magnitude);
+            direction.Normalize();
+
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                movement = direction * runSpeed * movementSpeed * Time.deltaTime;
+
+                // Determino que cuando el personaje se esté moviendo se inicie la animación de movimiento
+                animator.SetBool("Moviendose", true);
+                animator.SetBool("Agacharse", true);
+            }
+            else
+            {
+                movement = direction * speed * movementSpeed * Time.deltaTime;
+
+                // Determino que cuando el personaje se esté moviendo se inicie la animación de movimiento
+                animator.SetBool("Moviendose", true);
+                animator.SetBool("Agacharse", false);
+            }
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 0.2f);
+
+            // Si el audio no se está reproduciendo, comienza a reproducirlo en bucle
+            
         }
         else
         {
-            animator.SetBool("Moviendose", true);
+            // Si el personaje no se está moviendo, detiene la reproducción del audio
+            
         }
 
-
-        ControladorDeAgente.transform.LookAt(ControladorDeAgente.transform.position + movePlayer);
-
-        SetGravity();
-
-        PlayerSkills();
-
-        ControladorDeAgente.Move(movePlayer * Time.deltaTime);
-        
-    }
-
-    private void camDirection()
-    {
-        camForward = cam.transform.forward;
-        camRigth = cam.transform.right;
-        camForward.y = 0;
-        camRigth.y = 0;
-
-        camForward = camForward.normalized;
-        camRigth = camRigth.normalized;
-    }
-
-    private void SetGravity()
-    {
-        if(ControladorDeAgente.isGrounded )
-        {
-            fallVelocity = -Gravedad * Time.deltaTime;
-            movePlayer.y = fallVelocity;
-        }
-        else
-        {
-            fallVelocity -= Gravedad *Time.deltaTime;
-            movePlayer.y = fallVelocity;
-        }
-        animator.SetBool("IsGrounded",ControladorDeAgente.isGrounded);    
-    }
-
-    private void PlayerSkills()
-    {
-        if(ControladorDeAgente.isGrounded && Input.GetButtonDown("Jump") && Agachado==false)
-        {
-            fallVelocity = FuerzaDeSalto;
-            movePlayer.y = fallVelocity;
-            animator.SetTrigger("Salto");
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftShift) && Agachado == false)
-        {
-            animator.SetTrigger("Agacharse");
-            Agachado = true;
-        }
-        else if(Input.GetKeyDown(KeyCode.LeftShift) && Agachado == true)
-        {
-            animator.SetTrigger("Agacharse");
-            Agachado = false;
-        }
+        // Añade la gravedad al personaje
+        movement.y += gravity * Time.deltaTime;
+        // Aplica el movimiento
+        characterController.Move(movement);
     }
 
 }
+

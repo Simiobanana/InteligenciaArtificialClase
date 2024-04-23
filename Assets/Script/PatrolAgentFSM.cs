@@ -201,7 +201,7 @@ public class PatrolAgentFSM : NaiveFSM
         _DetectedPlayer = false; // por defecto la ponemos como falso.
 
         //Establecemos que el color de la luz sea verde normalmente cuando esta en falso el detected player
-        _light.color = Color.green;
+        //_light.color = Color.green;
         //_Renderer.material.color = new Color(1, 0, 0, 1);
         Vector3 AgentToTargetVector = (_PlayerGameObject.transform.position - transform.position);
 
@@ -231,7 +231,7 @@ public class PatrolAgentFSM : NaiveFSM
         _LastKnownPlayerPosition = _PlayerGameObject.transform.position;
         _DetectedPlayer = true; // solo cambia a verdadera aquí. 
         //Cambiamos la luz a amarillo cuando detected player es true
-        _light.color = Color.magenta;
+        //_light.color = Color.magenta;
         //_Renderer.material.color = new Color(1, 0, 1, 1);
         return true;
     }
